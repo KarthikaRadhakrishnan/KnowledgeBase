@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="stylesheets/screen.css" type="text/css" />
+</head>
+
+<body>
+    <div class="content">
+        <div id="response-message" class="message">response message here</div>
+        <div class="datagrid">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Sex</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>John Smith</td>
+                    <td>31</td>
+                    <td>Male</td>
+                    <td>
+                        <a href="javascript:void(0);"  onclick="App.view(event);" data-id="1" msg_type="0">view</a>
+                        <a href="javascript:void(0);" onclick="App.remove(event)" data-id="1" msg_type="0">remove</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Sara Johnson</td>
+                    <td>29</td>
+                    <td>Female</td>
+                    <td>
+                        <a href="javascript:void(0);" onclick="App.view(event);" data-id="2" msg_type="0">view</a>
+                        <a href="javascript:void(0);" onclick="App.remove(event)" data-id="2" msg_type="0">remove</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script>
+
+        var baseUrl = "http://localhost/projects/kb/";// set the base url
+		
+        var url = baseUrl + 'api.php';
+		
+		var success_msg = "Request has been done"; // success message
+		var error_msg = "Request is failed!"; // error message
+
+        /*function view(event) {
+		
+		    //var id = event.target.getAttribute('data-id'); // can also determine the id this way or
+			
+			var id = $(event.target).closest('tr').children('td:first').text(); //determine the id through ID column
+			
+			var data = {
+			"action": "view" // api.php file will call view method 
+			};
+			
+			data = "id=" + id + "&" + $.param(data); // pass selected id in the request
+			
+            $.ajax({
+                url: url,
+				type: "GET",
+                data: data,
+				dataType: 'json',
+				success: function(response) {
+					alert(response);
+				}
+            });
+			
+		} */
+
+    var App = function(){
+			
+        var view = function (event) {
+		    //var id = event.target.getAttribute('data-id'); // can also determine the id this way or
+			
+			var id = $(event.target).closest('tr').children('td:first').text(); //determine the id through ID column
+			
+			var data = {
+			"action": "view" // api.php file will call view method 
+			};
+			
+			// check default message is whether success or failure -  change 1 (success) if zero, 0 (failure) if one 
+			var default_msg_type = event.target.getAttribute('msg_type');
+			
+			data = "id=" + id + "&is_show_success=" + default_msg_type + "&" + $.param(data); // pass selected id in the request
+
+            $.ajax({
+                url: url,
+				type: "GET",
+                data: data,
+				dataType: 'json',
+				success: function(response) {
+
+				if(response.msg_type){
+					//alert('msg' + ': ' + response.msg+ 'person ID : ' + response.person_id);
+					var set_attr = event.target.setAttribute('msg_type',0);
+					$("#response-message").text(success_msg).removeClass('failed').addClass('success').delay(5000).fadeOut(800).show(); // apply custom message and css accordingly
+				}else{
+					var set_attr = event.target.setAttribute('msg_type',1);
+					$("#response-message").text(error_msg).removeClass('success').addClass('failed').delay(5000).fadeOut(800).show(); // apply custom message and css accordingly
+				}
+				
+			   }
+            });
+        }
+	
+        var remove = function (event) {
+			var id = $(event.target).closest('tr').children('td:first').text(); //determine the id through ID column
+			
+			var data = {
+			"action": "remove" // api.php file will call remove method 
+			};
+			
+			// check default message is whether success or failure -  change 1 (success) if zero, 0 (failure) if one 
+			var default_msg_type = event.target.getAttribute('msg_type');
+			
+			data = "id=" + id + "&is_show_success=" + default_msg_type + "&" + $.param(data); // pass selected id in the request
+			
+            $.ajax({
+                url: url,
+				type: "GET",
+                data: data,
+				dataType: 'json',
+				success: function(response) {
+					//alert('msg' + ': ' + response.msg+ 'person ID : ' + response.person_id);
+					if(response.msg_type){
+						//alert('msg' + ': ' + response.msg+ 'person ID : ' + response.person_id);
+						var set_attr = event.target.setAttribute('msg_type',0);
+						$(event.target).closest('tr').remove();
+						$("#response-message").text('Table row is successfully removed').removeClass('failed').addClass('success').delay(5000).fadeOut(800).show(); // apply custom message and css accordingly
+					}else{
+						var set_attr = event.target.setAttribute('msg_type',1);
+						$("#response-message").text('Table row is not removed').removeClass('success').addClass('failed').delay(5000).fadeOut(800).show(); // apply custom message and css accordingly
+					}
+				}
+            });
+        }
+
+        function initialize() {
+            //
+        }
+
+        return {
+         // return the namespace methods
+		 view : view,
+		 remove : remove
+
+        }
+
+    }();
+	
+	
+
+    $(function () {
+	
+	//App.remove();
+
+    });
+</script>
+</body>
+</html>
